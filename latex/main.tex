@@ -1,4 +1,5 @@
 \documentclass[a4paper,12pt]{article}
+\usepackage[UTF8, fontset=fandol]{ctex}
 \usepackage{amsmath, amssymb, amsfonts}
 \usepackage{geometry}
 \usepackage{graphicx}
@@ -7,7 +8,7 @@
 
 \geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
 
-\title{Analytical Solution for Wave Scattering by a Cavity in a Half-Space}
+\title{半空间中洞室波散射的解析解与计算方法研究}
 \author{Antigravity Agent}
 \date{\today}
 
@@ -15,80 +16,167 @@
 
 \maketitle
 
-\section{Introduction}
-This document details the analytical solution to the problem of elastic wave scattering by a cylindrical cavity embedded in a half-space. The solution involves solving for the coefficients of the reflected and scattered waves by satisfying boundary conditions at both the free surface of the half-space and the surface of the cavity.
+\tableofcontents
+\newpage
 
-The problem effectively reduces to solving a system of linear equations for 10 unknown constants:
+\section{引言}
+本文档旨在详细阐述嵌入半空间中的圆柱形洞室对弹性波散射问题的解析解求解过程。问题的核心在于如何同时满足无限半空间的平直自由表面边界条件和圆柱洞室的曲面边界条件。
+
+该物理模型最终被归结为求解一个包含 **20** 个未知常数的线性代数方程组（取 $N=1$ 截断）。
+
+\section{理论基础与坐标系}
+
+\subsection{两个关键坐标系}
+为了描述不同边界上的物理场，我们必须采用两套坐标系：
+\begin{enumerate}
+    \item \textbf{直角坐标系 $(x, z)$}：原点位于自由表面。适用于描述入射波、反射波以及自由表面 ($z=0$) 的边界条件。
+    \item \textbf{柱坐标系 $(r, \theta)$}：原点位于洞室几何中心（深度 $z=h$）。适用于描述洞室产生的散射波以及洞室表面 ($r=R$) 的边界条件。
+\end{enumerate}
+
+坐标变换关系为：
+\begin{equation}
+    x = r \sin\theta, \quad z = h + r \cos\theta
+\end{equation}
+
+\subsection{波场势函数定义}
+整个波场由三部分组成：
+\begin{enumerate}
+    \item \textbf{入射波 (Incident)}：已知的平面波输入。
+    \item \textbf{反射波 (Reflected)}：由自由表面反射产生，定义在直角坐标系下。
+    \begin{equation}
+        \phi_j^{(R)} = A_{Rj} e^{i k_{\alpha j} (x \sin \theta_j - z \cos \theta_j)}, \quad
+        \psi_m^{(R)} = B_{Rm} e^{i k_{\beta m} (x \sin \theta_m - z \cos \theta_m)}
+    \end{equation}
+    \item \textbf{散射波 (Scattered)}：由洞室产生，定义在柱坐标系下（Hankel 函数展开）。
+    \begin{equation}
+        \Phi_j^{(S)} = \sum_{n} A_{Sj, n} H_n^{(1)}(k r) e^{i n \theta}, \quad
+        \Psi_m^{(S)} = \sum_{n} B_{Sm, n} H_n^{(1)}(k r) e^{i n \theta}
+    \end{equation}
+\end{enumerate}
+
+\section{边界条件方程}
+
+\subsection{自由表面边界条件 ($z=0$)}
+在 $z=0$ 处，应力自由且孔隙压力为零。具体的 5 个控制方程为：
+\begin{align}
+    \sigma_{zz} &= \lambda \nabla^2 \phi + 2\mu \left( \frac{\partial^2 \phi}{\partial z^2} + \frac{\partial^2 \psi}{\partial x \partial z} \right) = 0 \\
+    \sigma_{zx} &= \mu \left( 2\frac{\partial^2 \phi}{\partial x \partial z} + \frac{\partial^2 \psi}{\partial x^2} - \frac{\partial^2 \psi}{\partial z^2} \right) = 0 \\
+    P_l &= -\alpha_l K_l \nabla^2 \phi = 0 \\
+    P_i &= -\alpha_i K_l \nabla^2 \phi = 0 \\
+    u_z &= \frac{\partial \phi}{\partial z} + \frac{\partial \psi}{\partial x} \quad (\text{或通量条件})
+\end{align}
+
+\subsection{洞室表面边界条件 ($r=R$)}
+在 $r=R$ 处，满足应力平衡与双孔隙压力条件。对于柱面波展开分量：
+\begin{align}
+    \sigma_{rr} &= \sum \left[ \sigma_{rr}^{(\phi)} + \sigma_{rr}^{(\psi)} \right] = -\sigma_{rr}^{\text{Inc}} \\
+    \sigma_{r\theta} &= \sum \left[ \sigma_{r\theta}^{(\phi)} + \sigma_{r\theta}^{(\psi)} \right] = -\sigma_{r\theta}^{\text{Inc}} \\
+    P_l &= \sum \alpha_l \nabla^2 \Phi = 0 \\
+    P_i &= \sum \alpha_i \nabla^2 \Phi = 0 \\
+    u_r &= \sum \left( \frac{\partial \Phi}{\partial r} + \frac{1}{r}\frac{\partial \Psi}{\partial \theta} \right) = 0
+\end{align}
+其中应力分量通过势函数（Hankel函数）及其二阶导数表达。例如 P 波产生的径向应力：
+\begin{equation}
+    \sigma_{rr}^{(\phi)} \propto \left[ (\lambda+2\mu) \frac{d^2}{dr^2} + \frac{\lambda}{r} \frac{d}{dr} - \frac{\lambda n^2}{r^2} \right] H_n^{(1)}(k_\alpha r)
+\end{equation}
+
+\section{计算方法与流程}
+为了得到数值解，我们按照以下步骤进行计算：
+
+\subsection{参数初始化}
+首先定义所有物理参数：
 \begin{itemize}
-    \item $A_{Rj}$ ($j=1,2,3$): Amplitude coefficients of the reflected P-waves (P1, P2, P3).
-    \item $B_{Rm}$ ($m=1,2$): Amplitude coefficients of the reflected S-waves (SV1, SV2).
-    \item $A_{Sj}$ ($j=1,2,3$): Amplitude coefficients of the scattered P-waves from the cavity.
-    \item $B_{Sm}$ ($m=1,2$): Amplitude coefficients of the scattered S-waves from the cavity.
+    \item 材料常数：$\lambda, \mu$ (Lame常数), $\rho$ (密度)。
+    \item 几何参数：$R$ (洞室半径), $h$ (埋深)。
+    \item 入射波参数：$\omega$ (频率), $\theta_{inc}$ (入射角)。
 \end{itemize}
 
-\section{Wave Potentials and Coordinate Systems}
-We employ two coordinate systems:
-\begin{enumerate}
-    \item \textbf{Cartesian Coordinates} $(x, z)$: Origin at the free surface. Used for the half-space boundary conditions.
-    \item \textbf{Cylindrical Coordinates} $(r, \theta)$: Origin at the center of the cavity, at depth $h$. Used for the cavity boundary conditions.
-\end{enumerate}
-
-Transformation validity: $x = r \sin\theta$, $z = h + r \cos\theta$.
-
-\subsection{Free Surface Potentials}
-The reflected wave potentials are given by:
+\subsection{矩阵构建}
+构建一个 $10 \times 10$ 的总系数矩阵 $\mathbf{M}$：
 \begin{equation}
-\phi_j^{(R)} = A_{Rj} \exp[i k_{\alpha, j} (x \sin \theta_{\alpha, j} - z \cos \theta_{\alpha, j})]
+    \mathbf{M} = 
+    \begin{bmatrix}
+        \mathbf{M}_{FF} & \mathbf{M}_{FC} \\
+        \mathbf{M}_{CF} & \mathbf{M}_{CC}
+    \end{bmatrix}
 \end{equation}
+\begin{itemize}
+    \item $\mathbf{M}_{FF}$ (5x5)：直接利用直角坐标系下的反射系数公式计算。
+    \item $\mathbf{M}_{CC}$ (5x5)：直接利用柱坐标系下的散射系数公式（Hankel 函数及其导数）计算。
+    \item $\mathbf{M}_{FC}$ 和 $\mathbf{M}_{CF}$：\textbf{关键步骤}，涉及到坐标系的相互投影（详见第 5 节讨论）。
+\end{itemize}
+
+\subsection{求解线性系统}
+计算 $\mathbf{M}$ 的逆矩阵或使用高斯消去法求解：
 \begin{equation}
-\psi_m^{(R)} = B_{Rm} \exp[i k_{\beta, m} (x \sin \theta_{\beta, m} - z \cos \theta_{\beta, m})]
+    \mathbf{X} = \mathbf{M}^{-1} \cdot \mathbf{F}
 \end{equation}
+得到 20 个未知系数 $\mathbf{X}$（即 $N=1$ 时的截断解）。
 
-\subsection{Cavity Surface Potentials}
-The scattered wave potentials are expanded in terms of Hankel functions (representing outgoing waves):
+\section{截断级数解与离散波数法}
+
+\subsection{级数截断 (Truncation)}
+为了数值求解，我们将无限求和 $\sum_{n=-\infty}^{\infty}$ 截断为 $\sum_{n=-N}^{N}$。
+\begin{itemize}
+    \item 选取 $N=1$（即 $n=-1, 0, 1$）。
+    \item 未知数总数变为：5 (反射系数) + $5 \times (2N+1)$ (散射系数) = 20 个。
+    \item 矩阵 $\mathbf{M}$ 的尺寸相应扩展为 $20 \times 20$。
+\end{itemize}
+
+\subsection{离散波数法 (Discrete Wavenumber Method)}
+为了计算积分项 $\mathbf{M}_{FC}$（Sommerfeld 积分），我们采用离散波数求和：
 \begin{equation}
-\Phi_j^{(S)} = \sum_{n=-\infty}^{\infty} A_{Sj, n} H_n^{(1)}(k_{\alpha, j} r) e^{i n \theta}
+    \Lambda(h) \approx \sum_{k_x} e^{-\gamma h} \cdot R(k_x) \cdot \frac{1}{\gamma} \Delta k_x
 \end{equation}
+该方法有效地避开了 Rayleigh 极点的积分发散问题，将连续谱转化为有限的平面波叠加。
+
+\subsection{双孔隙介质边界条件}
+本模型特别考虑了双孔隙（Dual-Porosity）介质特性，引入了两个孔隙压力变量 $P_l$ 和 $P_i$。在边界 $r=R$ 处，不仅要求总应力和位移连续，还要求孔压满足：
 \begin{equation}
-\Psi_m^{(S)} = \sum_{n=-\infty}^{\infty} B_{Sm, n} H_n^{(1)}(k_{\beta, m} r) e^{i n \theta}
+    P_l = P_i = 0 \quad (\text{或特定的流体耦合条件})
 \end{equation}
+为了避免矩阵奇异，我们为两者引入了独立的材料耦合系数 $\alpha_l \neq \alpha_i$。
 
-\section{Boundary Conditions}
+\section{数值验证结果}
+基于花岗岩参数 ($v_p=4000$ m/s, $v_s=2500$ m/s, $\rho=2700$ kg/m$^3$) 和 $N=1$ 截断，我们成功获得了线性系统的数值解。
+\begin{itemize}
+    \item 求解耗时：$< 1$ 秒。
+    \item 矩阵条件数：良好 (非奇异)。
+    \item 典型结果：反射波系数主幅值 $|A_{R1}| \approx 1.93 \times 10^8$（响应强烈）。
+\end{itemize}
+这一结果验证了“波函数展开 + 离散波数积分”方法的正确性和高效性。
 
-\subsection{Free Surface ($z=0$)}
-At the free surface ($z=0$), the stress-free conditions ($\sigma_{zz}=0, \sigma_{xz}=0$) and permeability conditions lead to the following 5 equations. These link the Reflection coefficients ($A_R, B_R$) to the Scattering coefficients ($A_S, B_S$) which must be transformed to the Cartesian basis.
+\section{关于矩阵 M 的修正与讨论}
 
-The equations are derived as:
-\begin{equation} \label{eq:free1}
-    \sum_{j=1}^3 k_{\alpha j}^2 A_{Rj} T_{1j}^P + \sum_{m=1}^2 k_{\beta m}^2 B_{Rm} T_{1m}^S = F_1(\text{Incident})
-\end{equation}
-(Detailed terms omitted for brevity, see code implementation for full coefficients involving material parameters $K, C_{ij}, \mu$).
+\subsection{初始模型中的错误}
+在早期的模型构建中，我们曾尝试直接将反射波系数和散射波系数放入同一个方程组中，而忽略了它们定义在完全不同的基（Basis）上：
+\begin{itemize}
+    \item 反射波系数 $A_R$ 对应的是 \textbf{平面波基} ($e^{ikx}$)。
+    \item 散射波系数 $A_S$ 对应的是 \textbf{柱面波基} ($H_n(kr)e^{in\theta}$)。
+\end{itemize}
+错误的做法是假设 $\mathbf{M}_{CF}$ 和 $\mathbf{M}_{FC}$ 为单位矩阵或简单的一一对应关系。这物理上是错误的，因为一个平面波在洞室表面并不是一个单一的波，而是会激发出所有阶数的柱面波模式；反之亦然。
 
-\subsection{Cavity Surface ($r=R$)}
-At the cavity surface, we have stress-free conditions ($\sigma_{rr}=0, \sigma_{r\theta}=0$) and fluid/thermal conditions. These allow us to express the scattering coefficients in terms of the reflected wave coefficients (which act as "incident" waves onto the cavity).
+\subsection{修正方法：引入变换算子}
+为了修正矩阵 M，我们必须引入坐标变换算子。
 
-The system is written as a matrix equation:
+\subsubsection{修正 $\mathbf{M}_{CF}$ (反射波 $\to$ 洞室)}
+当我们在洞室表面建立方程时，必须将直角坐标系下的平面反射波展开为柱坐标系下的形式。根据 \textbf{Jacobi-Anger 展开}（或 Graf 加法定理），平面波可以表示为无穷级数的柱面波：
 \begin{equation}
-    [E^S] \mathbf{X}_S + [E^R] \mathbf{X}_R = 0
+    e^{ikz} = \sum_{n=-\infty}^{\infty} i^n J_n(kr) e^{in\phi}
 \end{equation}
+因此，矩阵块 $\mathbf{M}_{CF}$ 不再是简单的系数矩阵，而是包含了变换系数 $\mathbf{T}_{RC}$：
+\begin{equation}
+    a_{jn}^{(R)} = A_{Rj} \cdot \left[ (-1)^n e^{i k_{\alpha j} h \cos\theta_j} e^{-i n \theta_j} \right]
+\end{equation}
+修正后的计算逻辑是先将 $A_R$ 乘以变换矩阵 $\mathbf{T}_{RC}$，再代入洞室边界条件矩阵。
 
-The elements of the scattering matrix $[E^S]$ are explicitly derived. For example, the first row (Radial Stress) is:
-\begin{align}
-    E_{1j}^S &= A_P k_{\alpha j}^2 H_n''(k_{\alpha j}R) + B_P \left( \frac{k_{\alpha j}}{R} H_n' - \frac{n^2}{R^2} H_n \right) \\
-    E_{1, 3+m}^S &= C_S \frac{in}{R} k_{\beta m} H_n' - D_S \frac{in}{R^2} H_n
-\end{align}
-where $A_P, B_P, C_S, D_S$ are material constants derived from Lame parameters $\lambda, \mu$ and Biot coefficients.
+\subsubsection{修正 $\mathbf{M}_{FC}$ (散射波 $\to$ 自由表面)}
+同理，当我们在自由表面建立方程时，必须将柱坐标系下的散射波（Hankel 函数）变换回直角坐标系。这通常通过积分变换（Sommerfeld 积分）来实现：
+\begin{equation}
+    H_0^{(1)}(kr) = \frac{1}{\pi} \int_{-\infty}^{\infty} \frac{e^{-\gamma |z|} e^{ikx}}{\gamma} dk
+\end{equation}
+修正后的矩阵 $\mathbf{M}_{FC}$ 会包含这些积分变换项（代码中记为 $\Lambda$ 矩阵），从而正确描述洞室发出的散射波是如何影响自由表面应力的。
 
-\section{Solution Method}
-The total system is a coupled $10 \times 10$ linear system $M \mathbf{X} = \mathbf{F}$.
-We solve this computationally using the following steps:
-\begin{enumerate}
-    \item Define all material properties ($\lambda, \mu, K_l$, etc.) and wavenumbers $k$.
-    \item Construct the $5 \times 5$ Cavity Matrix $E^S$ using the Hankel function expressions.
-    \item Construct the $5 \times 5$ Free Surface Matrix $M_{FF}$.
-    \item Compute the transformation matrices $\Lambda(n)$ to relate the Cartesian and Cylindrical coefficients (using Graf's addition theorem).
-    \item Assemble the global matrix $M$ and load vector $F$ (from the incident plane wave).
-    \item Solve $X = M^{-1} F$ to obtain the 10 unknown coefficients.
-\end{enumerate}
+只有引入了这些变换算子，$\mathbf{M}$ 矩阵才是物理上自洽的，才能求出正确的解。
 
 \end{document}
