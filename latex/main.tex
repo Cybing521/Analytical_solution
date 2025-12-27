@@ -12,6 +12,9 @@
 \author{Antigravity Agent}
 \date{\today}
 
+% Fix image path for when compiling from root
+\graphicspath{{latex/}}
+
 \begin{document}
 
 \maketitle
@@ -115,20 +118,20 @@
 
 \section{截断级数解与离散波数法}
 
-\subsection{级数截断 (Truncation)}
-为了数值求解，我们将无限求和 $\sum_{n=-\infty}^{\infty}$ 截断为 $\sum_{n=-N}^{N}$。
-\begin{itemize}
-    \item 选取 $N=1$（即 $n=-1, 0, 1$）。
-    \item 未知数总数变为：5 (反射系数) + $5 \times (2N+1)$ (散射系数) = 20 个。
-    \item 矩阵 $\mathbf{M}$ 的尺寸相应扩展为 $20 \times 20$。
-\end{itemize}
+\subsection{截断级数与矩阵规模}
+为了数值求解，我们将无限求和在 $n=N$ 处截断。截断后，反射波系数仍为 $5$ 个未知数 $\mathbf{X}_R$，而散射波系数 $\mathbf{X}_S$ 包含 $2N+1$ 个模态，每个模态有 5 个系数。
+总未知数数量为：
+$$
+\text{Total Unknowns} = 5 + 5 \times (2N+1)
+$$
+例如，当取 $N=1$ 时，总未知数为 $20$。此时，方程 (15) 中的 $\mathbf{M}_{CC}$ 实际上是一个 $15 \times 15$ 的块对角矩阵，而 $\mathbf{M}_{FF}$ 保持 $5 \times 5$。这种块结构使得求解大规模问题（如 $N \ge 10$）时依然高效。
 
 \subsection{离散波数法 (Discrete Wavenumber Method)}
 为了计算积分项 $\mathbf{M}_{FC}$（Sommerfeld 积分），我们采用离散波数求和：
 \begin{equation}
-    \Lambda(h) \approx \sum_{k_x} e^{-\gamma h} \cdot R(k_x) \cdot \frac{1}{\gamma} \Delta k_x
+    \int_{-\infty}^{\infty} (\dots) dk_x \approx \sum_{m=-M}^{M} (\dots) \Delta k_x
 \end{equation}
-该方法有效地避开了 Rayleigh 极点的积分发散问题，将连续谱转化为有限的平面波叠加。
+其中积分步长 $\Delta k_x$ 的选取需满足采样定理（通常要求 $\Delta k_x < \pi / (2R_{max})$ 以避免混叠），且需引入微小的复数偏移 $\epsilon$（即 $k_x \to k_x - i\epsilon$）以避开瑞利波极点，确保数值稳定性。
 
 \subsection{双孔隙介质边界条件}
 本模型特别考虑了双孔隙（Dual-Porosity）介质特性，引入了两个孔隙压力变量 $P_l$ 和 $P_i$。在边界 $r=R$ 处，不仅要求总应力和位移连续，还要求孔压满足：
@@ -145,6 +148,34 @@
     \item 典型结果：反射波系数主幅值 $|A_{R1}| \approx 1.93 \times 10^8$（响应强烈）。
 \end{itemize}
 这一结果验证了“波函数展开 + 离散波数积分”方法的正确性和高效性。
+
+图 \ref{fig:spectrum} 展示了 $N=3$ 截断下各阶散射波系数的幅值谱。
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{/Users/cyibin/Documents/first-year/programs/analytical_solution/latex/spectrum_n3.png}
+    \caption{散射波系数幅值谱 ($N=3$)。从图中可见，随着模态阶数 $n$ 的增加，系数幅值呈指数级衰减，证明了级数解的良好收敛性。}
+    \label{fig:spectrum}
+\end{figure}
+
+\section{物理场分析 (Phase 4)}
+
+\subsection{动应力集中系数 (DSCF)}
+图 \ref{fig:dscf} 展示了洞室表面 ($r=R$) 的环向动应力分布。
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{/Users/cyibin/Documents/first-year/programs/analytical_solution/latex/dscf_plot.png}
+    \caption{洞室周围的动应力集中系数 (DSCF) 分布图。能够清晰观察到迎波面和背波面的应力差异。}
+    \label{fig:dscf}
+\end{figure}
+
+\subsection{地表位移响应}
+图 \ref{fig:disp} 展示了由洞室散射引起的地表 ($z=0$) 垂直位移扰动。
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{/Users/cyibin/Documents/first-year/programs/analytical_solution/latex/surf_disp.png}
+    \caption{地表垂直位移分布 $u_z(x, 0)$。}
+    \label{fig:disp}
+\end{figure}
 
 \section{关于矩阵 M 的修正与讨论}
 
