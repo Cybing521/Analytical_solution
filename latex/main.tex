@@ -1,0 +1,94 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{bm}
+
+\geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
+
+\title{Analytical Solution for Wave Scattering by a Cavity in a Half-Space}
+\author{Antigravity Agent}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+This document details the analytical solution to the problem of elastic wave scattering by a cylindrical cavity embedded in a half-space. The solution involves solving for the coefficients of the reflected and scattered waves by satisfying boundary conditions at both the free surface of the half-space and the surface of the cavity.
+
+The problem effectively reduces to solving a system of linear equations for 10 unknown constants:
+\begin{itemize}
+    \item $A_{Rj}$ ($j=1,2,3$): Amplitude coefficients of the reflected P-waves (P1, P2, P3).
+    \item $B_{Rm}$ ($m=1,2$): Amplitude coefficients of the reflected S-waves (SV1, SV2).
+    \item $A_{Sj}$ ($j=1,2,3$): Amplitude coefficients of the scattered P-waves from the cavity.
+    \item $B_{Sm}$ ($m=1,2$): Amplitude coefficients of the scattered S-waves from the cavity.
+\end{itemize}
+
+\section{Wave Potentials and Coordinate Systems}
+We employ two coordinate systems:
+\begin{enumerate}
+    \item \textbf{Cartesian Coordinates} $(x, z)$: Origin at the free surface. Used for the half-space boundary conditions.
+    \item \textbf{Cylindrical Coordinates} $(r, \theta)$: Origin at the center of the cavity, at depth $h$. Used for the cavity boundary conditions.
+\end{enumerate}
+
+Transformation validity: $x = r \sin\theta$, $z = h + r \cos\theta$.
+
+\subsection{Free Surface Potentials}
+The reflected wave potentials are given by:
+\begin{equation}
+\phi_j^{(R)} = A_{Rj} \exp[i k_{\alpha, j} (x \sin \theta_{\alpha, j} - z \cos \theta_{\alpha, j})]
+\end{equation}
+\begin{equation}
+\psi_m^{(R)} = B_{Rm} \exp[i k_{\beta, m} (x \sin \theta_{\beta, m} - z \cos \theta_{\beta, m})]
+\end{equation}
+
+\subsection{Cavity Surface Potentials}
+The scattered wave potentials are expanded in terms of Hankel functions (representing outgoing waves):
+\begin{equation}
+\Phi_j^{(S)} = \sum_{n=-\infty}^{\infty} A_{Sj, n} H_n^{(1)}(k_{\alpha, j} r) e^{i n \theta}
+\end{equation}
+\begin{equation}
+\Psi_m^{(S)} = \sum_{n=-\infty}^{\infty} B_{Sm, n} H_n^{(1)}(k_{\beta, m} r) e^{i n \theta}
+\end{equation}
+
+\section{Boundary Conditions}
+
+\subsection{Free Surface ($z=0$)}
+At the free surface ($z=0$), the stress-free conditions ($\sigma_{zz}=0, \sigma_{xz}=0$) and permeability conditions lead to the following 5 equations. These link the Reflection coefficients ($A_R, B_R$) to the Scattering coefficients ($A_S, B_S$) which must be transformed to the Cartesian basis.
+
+The equations are derived as:
+\begin{equation} \label{eq:free1}
+    \sum_{j=1}^3 k_{\alpha j}^2 A_{Rj} T_{1j}^P + \sum_{m=1}^2 k_{\beta m}^2 B_{Rm} T_{1m}^S = F_1(\text{Incident})
+\end{equation}
+(Detailed terms omitted for brevity, see code implementation for full coefficients involving material parameters $K, C_{ij}, \mu$).
+
+\subsection{Cavity Surface ($r=R$)}
+At the cavity surface, we have stress-free conditions ($\sigma_{rr}=0, \sigma_{r\theta}=0$) and fluid/thermal conditions. These allow us to express the scattering coefficients in terms of the reflected wave coefficients (which act as "incident" waves onto the cavity).
+
+The system is written as a matrix equation:
+\begin{equation}
+    [E^S] \mathbf{X}_S + [E^R] \mathbf{X}_R = 0
+\end{equation}
+
+The elements of the scattering matrix $[E^S]$ are explicitly derived. For example, the first row (Radial Stress) is:
+\begin{align}
+    E_{1j}^S &= A_P k_{\alpha j}^2 H_n''(k_{\alpha j}R) + B_P \left( \frac{k_{\alpha j}}{R} H_n' - \frac{n^2}{R^2} H_n \right) \\
+    E_{1, 3+m}^S &= C_S \frac{in}{R} k_{\beta m} H_n' - D_S \frac{in}{R^2} H_n
+\end{align}
+where $A_P, B_P, C_S, D_S$ are material constants derived from Lame parameters $\lambda, \mu$ and Biot coefficients.
+
+\section{Solution Method}
+The total system is a coupled $10 \times 10$ linear system $M \mathbf{X} = \mathbf{F}$.
+We solve this computationally using the following steps:
+\begin{enumerate}
+    \item Define all material properties ($\lambda, \mu, K_l$, etc.) and wavenumbers $k$.
+    \item Construct the $5 \times 5$ Cavity Matrix $E^S$ using the Hankel function expressions.
+    \item Construct the $5 \times 5$ Free Surface Matrix $M_{FF}$.
+    \item Compute the transformation matrices $\Lambda(n)$ to relate the Cartesian and Cylindrical coefficients (using Graf's addition theorem).
+    \item Assemble the global matrix $M$ and load vector $F$ (from the incident plane wave).
+    \item Solve $X = M^{-1} F$ to obtain the 10 unknown coefficients.
+\end{enumerate}
+
+\end{document}
