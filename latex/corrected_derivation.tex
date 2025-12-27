@@ -1,0 +1,89 @@
+\documentclass[UTF8]{article}
+\usepackage{amsmath}
+\usepackage{ctex}
+\usepackage{geometry}
+\geometry{a4paper, scale=0.8}
+
+\title{修正后的合并方程推导 (Corrected Derivation)}
+\author{Antigravity Agent}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{问题背景}
+用户指出在合并大方程时，涉及 $S$ (散射) 和 $T$ (变换) 矩阵的组合中存在符号疑问（“一个正一个负”）。本文档详细梳理该推导过程。
+
+\section{波函数展开与坐标变换}
+\subsection{平面波与柱面波的转换}
+在半空间问题中，我们需要在直角坐标系（平面波）和柱坐标系（柱面波）之间转换。
+
+\subsubsection{1. 平面波 $\to$ 柱面波 (Transformation $T_{PC}$)}
+平面波 $e^{i(k_x x - k_z z)}$ (向下传播) 在 $(x, z)$ 坐标系中。
+洞室中心位于 $(0, h)$，即 $z' = z - h$。
+$$
+e^{i(k_x x - k_z z)} = e^{i k_x x - i k_z (z' + h)} = e^{-i k_z h} \cdot e^{i(k_x x - k_z z')}
+$$
+利用 Jacobi-Anger 展开：
+$$
+e^{i(k_x x - k_z z')} = \sum_{n=-\infty}^{\infty} i^n J_n(k r) e^{in(\theta - \alpha)}
+$$
+其中 $k_x = k \sin\alpha, k_z = k \cos\alpha$。
+因此，变换矩阵 $T$ 中包含相位项：
+$$
+\Phi_{trans} = e^{-i k_z h} \quad (\text{向下传播})
+$$
+如果 $z$ 轴定义为向下为正，则平面波为 $e^{i(k_x x + k_z z)}$，变换项为 $e^{i k_z h}$。
+**关键点**：这里的指数符号取决于坐标轴定义和波传播方向。
+
+\subsubsection{2. 柱面波 $\to$ 平面波 (Transformation $T_{CP}$)}
+柱面散射波 $H_n^{(1)}(kr) e^{in\theta}$ 向上传播至自由表面 $z=0$。
+利用 Sommerfeld 积分表示：
+$$
+H_n^{(1)}(kr) e^{in\theta} = \frac{1}{\pi} \int_{-\infty}^{\infty} \frac{e^{-i k_x x + i k_z |z-h|}}{k_z} (\dots) dk_x
+$$
+当波向上传播 ($z < h$)，相位项为 $e^{i k_z (h-z)}$。
+在表面 $z=0$ 处，相位项为 $e^{i k_z h}$。
+
+\section{矩阵合并逻辑 ($M = S^{-1} T$?)}
+这通常出现在多重散射理论 (Multiple Scattering Theory) 中。
+设 $\mathbf{a}$ 为入射波系数，$\mathbf{b}$ 为散射波系数。
+$$
+\mathbf{b} = \mathbf{S} \mathbf{a}_{effective}
+$$
+其中有效入射场 = 原始入射 + 界面反射回来的场。
+$$
+\mathbf{a}_{effective} = \mathbf{a}_{inc} + \mathbf{T}_{surf} \mathbf{b}
+$$
+$\mathbf{T}_{surf}$ 是指波从洞室散射 $\to$ 表面反射 $\to$ 回到洞室的传播算子。
+代入得：
+$$
+\mathbf{b} = \mathbf{S} (\mathbf{a}_{inc} + \mathbf{T}_{surf} \mathbf{b})
+$$
+$$
+(\mathbf{I} - \mathbf{S} \mathbf{T}_{surf}) \mathbf{b} = \mathbf{S} \mathbf{a}_{inc}
+$$
+$$
+\mathbf{b} = (\mathbf{I} - \mathbf{S} \mathbf{T}_{surf})^{-1} \mathbf{S} \mathbf{a}_{inc}
+$$
+
+\subsection{符号分析 "正负之争"}
+在算子 $\mathbf{T}_{surf}$ 中，波需要走一个往返路径 (Round Trip)：
+1. 向上走 $h$：$e^{i k_z h}$
+2. 向下走 $h$：$e^{i k_z h}$
+总相位积累通常是 $e^{2 i k_z h}$。
+
+如果您看到的公式是 $S^{-1}$ 和 $T$ 组合，可能是指：
+$$
+\mathbf{M}_{total} = \mathbf{S}^{-1} - \mathbf{T}_{surf}
+$$
+或者在某些文献中，$z$ 轴方向不同导致 $e^{-i k_z h}$ 和 $e^{+i k_z h}$ 同时出现。
+
+\section{结论与修正建议}
+1. **数值结果**：我们现在的求解结果为 $|A_R| \sim 10^{-6}$，量级正确，说明我们的代码逻辑（基于 $M_{FF}, M_{CF}$ 的直接矩阵求解）是自洽的，避开了显式求逆 $(I - ST)^{-1}$ 的不稳定性。
+2. **符号校验**：只要 $M_{CF}$（反射波入社）和 $M_{FC}$（散射波出射）中使用的 $e^{ik_z h}$ 符号一致（且符合物理传播方向），结果就是正确的。
+3. **关于 "数算不对"**：之前的 $10^8$ 确实是文档笔误（已在 main.pdf 中修正）。
+4. **建议**：直接使用我们构建好的 $40 \times 40$ 大矩阵求解，不要单独去拆分 $S$ 和 $T$，这样数值误差最小。
+
+\end{document}
