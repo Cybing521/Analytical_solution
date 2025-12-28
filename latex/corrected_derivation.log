@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.10.6)  27 DEC 2025 22:30
+This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.10.6)  28 DEC 2025 09:59
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -91,6 +91,17 @@ LaTeX Info: Redefining \Relbar on input line 970.
 LaTeX Info: Redefining \[ on input line 2953.
 LaTeX Info: Redefining \] on input line 2954.
 )
+(/usr/local/texlive/2025basic/texmf-dist/tex/latex/amsfonts/amssymb.sty
+Package: amssymb 2013/01/14 v3.01 AMS font symbols
+
+(/usr/local/texlive/2025basic/texmf-dist/tex/latex/amsfonts/amsfonts.sty
+Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
+\symAMSa=\mathgroup4
+\symAMSb=\mathgroup5
+LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
+))
 (/usr/local/texlive/2025basic/texmf-dist/tex/latex/ctex/ctex.sty
 (/usr/local/texlive/2025basic/texmf-dist/tex/latex/l3kernel/expl3.sty
 Package: expl3 2025-01-18 L3 programming layer (loader) 
@@ -355,7 +366,7 @@ Package fontspec Info:
 (fontspec)             Adjusting the maths setup (use [no-math] to avoid
 (fontspec)             this).
 
-\symlegacymaths=\mathgroup4
+\symlegacymaths=\mathgroup6
 LaTeX Font Info:    Overwriting symbol font `legacymaths' in version `bold'
 (Font)                  OT1/cmr/m/n --> OT1/cmr/bx/n on input line 11.
 LaTeX Font Info:    Redeclaring math accent \acute on input line 11.
@@ -442,13 +453,19 @@ LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
+LaTeX Font Info:    Trying to load font information for U+msa on input line 13.
 
-LaTeX Font Warning: Font shape `OMX/cmex/m/n' in size <10.53937> not available
-(Font)              size <10.95> substituted on input line 16.
+(/usr/local/texlive/2025basic/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 13.
 
 
-LaTeX Font Warning: Font shape `OMX/cmex/m/n' in size <15.05624> not available
-(Font)              size <14.4> substituted on input line 49.
+(/usr/local/texlive/2025basic/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+
+LaTeX Warning: No \author given.
 
 
 
@@ -456,24 +473,21 @@ LaTeX Font Warning: Font shape `OMX/cmex/m/n' in size <15.05624> not available
 
 ]
 
-[2] (latex/corrected_derivation.aux)
+[2]
+
+[3] (latex/corrected_derivation.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2022/07/14>
  ***********
-
-
-LaTeX Font Warning: Size substitutions with differences
-(Font)              up to 0.65625pt have occurred.
-
  ) 
 Here is how much of TeX's memory you used:
- 7283 strings out of 475366
- 207010 string characters out of 5762339
- 613932 words of memory out of 5000000
- 30160 multiletter control sequences out of 15000+600000
- 568037 words of font info for 99 fonts, out of 8000000 for 9000
+ 7864 strings out of 475366
+ 216854 string characters out of 5762339
+ 616540 words of memory out of 5000000
+ 30725 multiletter control sequences out of 15000+600000
+ 568259 words of font info for 105 fonts, out of 8000000 for 9000
  319 hyphenation exceptions out of 8191
  93i,6n,114p,386b,264s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on latex/corrected_derivation.pdf (2 pages).
+Output written on latex/corrected_derivation.pdf (3 pages).
